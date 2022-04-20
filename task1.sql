@@ -133,10 +133,20 @@ WHERE px = 1;
 ------------------------------------------------------------------------------------------
 
 --Q14 游戏玩法分析I
+SELECT player_id, MIN(event_date) AS first_login
+FROM activity
+GROUP BY player_id;
 
 ------------------------------------------------------------------------------------------
 
 --Q15 游戏玩法分析II
+SELECT player_id, device_id
+FROM activity a1
+WHERE event_date <= ALL (
+	SELECT event_date
+	FROM activity a2
+	WHERE a1.player_id = a2.player_id
+);
 
 ------------------------------------------------------------------------------------------
 
