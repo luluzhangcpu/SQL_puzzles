@@ -38,6 +38,8 @@ END
 SELECT score, dense_rank() OVER (ORDER BY score DESC)  'rank'
 FROM scores;
 
+------------------------------------------------------------------------------------------
+
 --Q5 连续出现的数字：查询所有至少连续出现三次的数字：
 SELECT DISTINCT num  ConsecutiveNums
 FROM (
