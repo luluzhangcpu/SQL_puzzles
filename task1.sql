@@ -151,10 +151,21 @@ WHERE event_date <= ALL (
 ------------------------------------------------------------------------------------------
 
 --Q16 游戏玩法分析III
+SELECT player_id, event_date, SUM(games_played) OVER (PARTITION BY player_id ORDER BY event_date) AS games_played_so_far
+FROM activity;
 
 ------------------------------------------------------------------------------------------
 
 --Q17 游戏玩法分析IV
+SELECT round(SUM(px) / COUNT(DISTINCT player_id), 2) AS fraction
+FROM (
+	SELECT CASE 
+			WHEN datediff(lead(event_date) OVER (PARTITION BY player_id ORDER BY event_date), event_date) = 1
+			AND event_date = MIN(event_date) OVER (PARTITION BY player_id ) THEN 1
+			ELSE 0
+		END AS px, player_id
+	FROM activity
+) a;
 
 ------------------------------------------------------------------------------------------
 
@@ -163,6 +174,11 @@ WHERE event_date <= ALL (
 ------------------------------------------------------------------------------------------
 
 --Q19 至少有5名直接下属的经理
+SELECT e2.name
+FROM employee e1
+	JOIN employee e2 ON e1.managerid = e2.id
+GROUP BY e1.managerid
+HAVING COUNT(e1.id) >= 5;
 
 ------------------------------------------------------------------------------------------
 
@@ -171,6 +187,12 @@ WHERE event_date <= ALL (
 ------------------------------------------------------------------------------------------
 
 --Q21 当选者
+SELECT name
+FROM vote v
+	LEFT JOIN candidate c ON c.id = v.candidateid
+GROUP BY v.candidateid
+ORDER BY COUNT(*) DESC
+LIMIT 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -184,6 +206,20 @@ WHERE bonus IS NULL
 ------------------------------------------------------------------------------------------
 
 --Q23 查询回答率最高的问题
+SELECT question_id AS survey_log
+FROM (
+	SELECT question_id, SUM(CASE 
+			WHEN action = 'answer' THEN 1
+			ELSE 0
+		END) / SUM(CASE 
+			WHEN action = 'show' THEN 1
+			ELSE 0
+		END) AS px
+	FROM surveylog
+	GROUP BY question_id
+) s
+ORDER BY px DESC, question_id
+LIMIT 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -192,6 +228,11 @@ WHERE bonus IS NULL
 ------------------------------------------------------------------------------------------
 
 --Q25 统计各专业学生人数
+SELECT dept_name, COUNT(s.student_id) AS student_number
+FROM student s
+	RIGHT JOIN department d ON d.dept_id = s.dept_id
+GROUP BY d.dept_id
+ORDER BY student_number DESC, dept_name;
 
 ------------------------------------------------------------------------------------------
 
@@ -204,6 +245,17 @@ WHERE referee_id IS NULL
 ------------------------------------------------------------------------------------------
 
 --Q27 2016年的投资
+SELECT round(SUM(tiv_2016), 2) AS TIV_2016
+FROM (
+	SELECT tiv_2016
+		, CASE 
+			WHEN COUNT(*) OVER (PARTITION BY lat, lon ) = 1
+			AND COUNT(*) OVER (PARTITION BY tiv_2015 ) != 1 THEN 1
+			ELSE 0
+		END AS cs
+	FROM insurance
+) i
+WHERE cs = 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -243,6 +295,17 @@ FROM friendrequest, requestaccepted;
 ------------------------------------------------------------------------------------------
 
 --Q33 好友申请II：
+SELECT ri AS id, COUNT(*) AS num
+FROM (
+	SELECT requester_id AS ri, accepter_id AS ai
+	FROM requestaccepted
+	UNION
+	SELECT accepter_id AS ri, requester_id AS ai
+	FROM requestaccepted
+) r
+GROUP BY ri
+ORDER BY COUNT(*) DESC
+LIMIT 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -276,6 +339,18 @@ WHERE sales_id NOT IN (
 ------------------------------------------------------------------------------------------
 
 --Q36 树节点
+SELECT id
+	, CASE 
+		WHEN p_id IS NULL THEN 'Root'
+		WHEN id IN (
+			SELECT p_id
+			FROM tree
+			WHERE p_id IS NOT NULL
+		) THEN 'Inner'
+		ELSE 'Leaf'
+	END AS Type
+FROM tree
+ORDER BY id;
 
 ------------------------------------------------------------------------------------------
 
@@ -292,6 +367,13 @@ FROM triangle;
 ------------------------------------------------------------------------------------------
 
 --Q38 平面上的最近距离
+SELECT round(sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2)), 2) AS shortest
+FROM point2d p1
+	JOIN point2d p2
+	ON p1.x != p2.x
+		OR p1.y != p2.y
+ORDER BY shortest
+LIMIT 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -303,6 +385,10 @@ FROM point p1
 ------------------------------------------------------------------------------------------
 
 --Q40 二级关注者
+SELECT f1.follower, COUNT(DISTINCT f2.follower) AS num
+FROM follow f1
+	JOIN follow f2 ON f1.follower = f2.followee
+GROUP BY f1.follower;
 
 ------------------------------------------------------------------------------------------
 
@@ -335,6 +421,14 @@ ORDER BY rating DESC;
 ------------------------------------------------------------------------------------------
 
 --Q45 换座位
+SELECT id
+	, CASE 
+		WHEN COUNT(*) OVER () = id
+		AND id % 2 != 0 THEN student
+		WHEN id % 2 != 0 THEN lead(student) OVER (ORDER BY id)
+		ELSE lag(student) OVER (ORDER BY id)
+	END AS student
+FROM seat;
 
 ------------------------------------------------------------------------------------------
 
@@ -348,6 +442,18 @@ END;
 ------------------------------------------------------------------------------------------
 
 --Q47 买下所有产品的客户
+SELECT customer_id
+FROM (
+	SELECT customer_id, COUNT(DISTINCT p.product_key) AS cnt
+	FROM product p
+		LEFT JOIN customer c ON c.product_key = p.product_key
+	GROUP BY customer_id
+) a
+	CROSS JOIN (
+		SELECT COUNT(*) AS nt
+		FROM product
+	) b
+WHERE a.cnt = b.nt;
 
 ------------------------------------------------------------------------------------------
 
@@ -374,6 +480,16 @@ GROUP BY product_id;
 ------------------------------------------------------------------------------------------
 
 --Q51 产品销售分析III
+SELECT product_id, year AS first_year, quantity, price
+FROM (
+	SELECT product_id, year
+		, CASE 
+			WHEN MIN(year) OVER (PARTITION BY product_id ) = year THEN 1
+			ELSE 0
+		END AS px, quantity, price
+	FROM sales
+) s
+WHERE px = 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -400,6 +516,17 @@ WHERE px = 1;
 ------------------------------------------------------------------------------------------
 
 --Q54 项目员工III
+SELECT project_id, employee_id
+FROM (
+	SELECT project_id, e.employee_id
+		, CASE 
+			WHEN MAX(experience_years) OVER (PARTITION BY project_id ) = experience_years THEN 1
+			ELSE 0
+		END AS px
+	FROM project p
+		LEFT JOIN employee e ON e.employee_id = p.employee_id
+) a
+WHERE px = 1;
 
 ------------------------------------------------------------------------------------------
 
@@ -457,6 +584,18 @@ WHERE cs = 0;
 ------------------------------------------------------------------------------------------
 
 --Q59 小众书籍
+SELECT book_id, name
+FROM (
+	SELECT b.book_id, name
+		, ifnull(SUM(quantity), 0) AS bs
+	FROM books b
+		LEFT JOIN orders o
+		ON o.book_id = b.book_id
+			AND dispatch_date BETWEEN '2018-06-23' AND '2019-06-23'
+	WHERE available_from < '2019-05-23'
+	GROUP BY b.book_id, name
+) a
+WHERE bs < 10;
 
 ------------------------------------------------------------------------------------------
 
