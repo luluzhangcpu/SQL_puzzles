@@ -141,6 +141,7 @@ WHERE request_at BETWEEN '2013-10-01' AND '2013-10-03'
 	AND u1.banned = 'No'
 	AND u2.banned = 'No'
 GROUP BY request_at;
+
 ------------------------------------------------------------------------------------------
 
 --Q14 游戏玩法分析I
@@ -192,6 +193,7 @@ FROM (
 	FROM employee
 ) e
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q19 至少有5名直接下属的经理
@@ -215,6 +217,7 @@ FROM (
 	FROM numbers
 ) n
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q21 当选者
@@ -257,6 +260,7 @@ LIMIT 1;
 --Q24 查询员工的累计薪水
 select id,month,sum(salary)over(partition by id order by month range between 2 preceding and current row)'Salary' from(
 select id,month,salary,rank()over(partition by id order by month desc)px from employee)e where px != 1 order by id,month desc;
+
 ------------------------------------------------------------------------------------------
 
 --Q25 统计各专业学生人数
@@ -344,6 +348,7 @@ FROM (
 ) c
 WHERE gs >= 3
 ORDER BY visit_date;
+
 ------------------------------------------------------------------------------------------
 
 --Q33 好友申请II：
@@ -461,6 +466,7 @@ FROM (
 	) a
 ) b
 GROUP BY yf, department_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q42 学生地理信息报告
@@ -481,6 +487,7 @@ FROM (
 ) s
 GROUP BY px
 ORDER BY px;
+
 ------------------------------------------------------------------------------------------
 
 --Q43 只出现一次的最大数字
@@ -680,6 +687,7 @@ FROM (
 ) a
 WHERE px = 1
 GROUP BY event_date;
+
 ------------------------------------------------------------------------------------------
 
 --Q59 小众书籍
@@ -709,6 +717,7 @@ FROM (
 WHERE rq BETWEEN '2019-04-01' AND '2019-06-30'
 GROUP BY rq
 ORDER BY rq;
+
 ------------------------------------------------------------------------------------------
 
 --Q61 每位学生的最高成绩
@@ -718,6 +727,7 @@ FROM (
 	FROM enrollments
 ) e
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q62 报告的记录
@@ -741,6 +751,7 @@ FROM (
 ) e
 GROUP BY business_id
 HAVING SUM(pd) >= 2;
+
 ------------------------------------------------------------------------------------------
 
 --Q64 用户购买平台
@@ -773,6 +784,7 @@ FROM t
 	ON s.spend_date = t.sdt
 		AND s.lx = t.pf
 GROUP BY t.sdt, t.pf;
+
 ------------------------------------------------------------------------------------------
 
 --Q65 报告的记录II
@@ -791,6 +803,7 @@ FROM (
 	) b
 	GROUP BY action_date
 ) c;
+
 ------------------------------------------------------------------------------------------
 
 --Q66 查询近30天活跃用户数
@@ -822,6 +835,7 @@ FROM views
 GROUP BY viewer_id, view_date
 HAVING COUNT(DISTINCT article_id) >= 2
 ORDER BY id;
+
 ------------------------------------------------------------------------------------------
 
 --Q70 市场分析I
@@ -831,6 +845,7 @@ FROM users u
 	ON o.buyer_id = user_id
 		AND year(order_date) = 2019
 GROUP BY user_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q71 市场分析II
@@ -853,6 +868,7 @@ FROM (
 		LEFT JOIN items i ON i.item_id = o.item_id
 ) a
 GROUP BY user_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q72 指定日期的产品价格
@@ -869,6 +885,7 @@ FROM (
 			AND p2.change_date <= '2019-08-16'
 ) a
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q73 即时食物配送I
@@ -894,6 +911,7 @@ FROM (
 		END AS cs
 	FROM delivery
 ) d;
+
 ------------------------------------------------------------------------------------------
 
 --Q75 重新格式化部门表
@@ -949,6 +967,7 @@ FROM (
 	FROM transactions
 ) t
 GROUP BY yf, country;
+
 ------------------------------------------------------------------------------------------
 
 --Q77 锦标赛优胜者
@@ -971,6 +990,7 @@ FROM (
 	) p
 ) a
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q78 最后一个能进入电梯的人
@@ -982,6 +1002,7 @@ FROM (
 WHERE zs <= 1000
 ORDER BY zs DESC
 LIMIT 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q79 每月交易II
@@ -1051,6 +1072,7 @@ FROM teams t
 	ON m.tid = t.team_id
 GROUP BY team_id, team_name
 ORDER BY num_points DESC, team_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q82 报告系统状态的连续日期
@@ -1065,6 +1087,7 @@ with temp as(
 )
 select zt period_state,min(dd) start_date,max(dd) end_date from(
 select zt,dd,case when datediff(@rq,@rq := dd) = -1 then @cx else @cx := @cx + 1 end px from temp,(select @rq := '2018-01-01',@cx := 0)b)c group by zt,px order by start_date;
+
 ------------------------------------------------------------------------------------------
 
 --Q83 每个帖子的评论数
@@ -1103,6 +1126,7 @@ FROM (
 WHERE u1 = 1
 	AND l2.page_id IS NULL
 	AND l1.user_id IS NOT NULL;
+	
 ------------------------------------------------------------------------------------------
 
 --Q86 向公司CEO汇报工作的所有人
@@ -1112,6 +1136,7 @@ FROM employees e1
 	LEFT JOIN employees e3 ON e2.manager_id = e3.employee_id
 WHERE e3.manager_id = 1
 	AND e1.employee_id != 1;
+	
 ------------------------------------------------------------------------------------------
 
 --Q87 学生们参加各科测试的次数
@@ -1144,6 +1169,7 @@ FROM (
 ) b
 GROUP BY px
 ORDER BY start_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q89 不同国家的天气类型
@@ -1170,12 +1196,14 @@ FROM employee;
 SELECT gender, day, SUM(score_points) OVER (PARTITION BY gender ORDER BY day) AS total
 FROM scores
 ORDER BY gender, day;
+
 ------------------------------------------------------------------------------------------
 
 --Q92 餐馆营业额变化增长
 select visited_on,zj amount,round(zj/7,2) average_amount from(
 select visited_on,sum(rxf)over(order by visited_on range between interval 6 day preceding and current row)zj,lag(rxf,6)over(order by visited_on)qm from(
 select visited_on,sum(amount)rxf from customer group by visited_on)a)b where qm is not null;
+
 ------------------------------------------------------------------------------------------
 
 --Q93 广告效果
@@ -1230,6 +1258,7 @@ FROM num
 	ON c.cnt = num.n
 GROUP BY n
 ORDER BY transactions_count;
+
 ------------------------------------------------------------------------------------------
 
 --Q96 电影评分
@@ -1247,6 +1276,7 @@ WHERE date_format(created_at, '%Y-%m') = '2020-02'
 GROUP BY r.movie_id
 ORDER BY AVG(rating) DESC, title
 LIMIT 1);
+
 ------------------------------------------------------------------------------------------
 
 --Q97 院系无效的学生
@@ -1269,6 +1299,7 @@ FROM (
 ) a
 WHERE px != 1
 	AND jx != 1;
+	
 ------------------------------------------------------------------------------------------
 
 --Q99 顾客的可信联系人数量
@@ -1281,6 +1312,7 @@ FROM invoices i
 	LEFT JOIN customers c2 ON c2.email = t.contact_email
 GROUP BY invoice_id, c1.customer_name, price
 ORDER BY invoice_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q100 获取最近第二次的活动
@@ -1292,6 +1324,7 @@ FROM (
 ) u
 WHERE cnt = 1
 	OR px = 2;
+	
 ------------------------------------------------------------------------------------------
 
 --Q101 使用唯一标识码替换员工ID
@@ -1327,6 +1360,7 @@ FROM num
 	LEFT JOIN product p ON p.product_id = num.a
 	LEFT JOIN sales s ON s.product_id = num.a
 ORDER BY product_id, report_year;
+
 ------------------------------------------------------------------------------------------
 
 --Q103 股票的资本损益
@@ -1336,6 +1370,7 @@ SELECT stock_name, SUM(CASE
 	END) AS capital_gain_loss
 FROM stocks
 GROUP BY stock_name;
+
 ------------------------------------------------------------------------------------------
 
 --Q104 购买了产品A和产品B却没有购买产品C的顾客
@@ -1362,6 +1397,7 @@ WHERE acp >= 1
 	AND bcp >= 1
 	AND ccp = 0
 ORDER BY customer_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q105 排名靠前的旅行者
@@ -1388,6 +1424,7 @@ FROM (
 GROUP BY student_id, student_name
 HAVING SUM(px) = 0
 ORDER BY student_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q107 净现值查询
@@ -1434,6 +1471,7 @@ SELECT left_operand, operator, right_operand
 FROM expressions e
 	LEFT JOIN variables v1 ON v1.name = e.left_operand
 	LEFT JOIN variables v2 ON v2.name = e.right_operand;
+	
 ------------------------------------------------------------------------------------------
 
 --Q110 苹果和桔子
@@ -1444,6 +1482,7 @@ SELECT sale_date, SUM(CASE
 FROM sales
 GROUP BY sale_date
 ORDER BY sale_date;
+
 ------------------------------------------------------------------------------------------
 
 --Q111 活跃用户
@@ -1470,6 +1509,7 @@ FROM (
 ) d
 	LEFT JOIN accounts ac ON ac.id = d.iid
 ORDER BY iid;
+
 ------------------------------------------------------------------------------------------
 
 --Q112 矩形面积
@@ -1481,6 +1521,7 @@ FROM points p1
 		AND p1.x_value != p2.x_value
 		AND p1.y_value != p2.y_value
 ORDER BY area DESC, p1, p2;
+
 ------------------------------------------------------------------------------------------
 
 --Q113 计算税后工资
@@ -1491,6 +1532,7 @@ SELECT company_id, employee_id, employee_name
 		ELSE salary * 0.51
 	END, 0) AS salary
 FROM salaries;
+
 ------------------------------------------------------------------------------------------
 
 --Q114 周内每天的销售情况
@@ -1523,6 +1565,7 @@ FROM items i
 	LEFT JOIN orders o ON o.item_id = i.item_id
 GROUP BY item_category
 ORDER BY Category;
+
 ------------------------------------------------------------------------------------------
 
 --Q115 按日期分组销售产品
@@ -1568,6 +1611,7 @@ FROM (
 		LEFT JOIN country c ON c.country_code = LEFT(p.phone_number, 3)
 ) a
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q118 消费者下单频率
@@ -1619,6 +1663,7 @@ FROM (
 ) a
 WHERE px <= 3
 ORDER BY customer_name, customer_id, order_date DESC;
+
 ------------------------------------------------------------------------------------------
 
 --Q122 产品名称格式修复
@@ -1642,6 +1687,7 @@ FROM (
 ) a
 WHERE px = 1
 ORDER BY product_name, product_id, order_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q124 银行账户概要
@@ -1661,6 +1707,7 @@ FROM users u
 	) t
 	ON t.uid = u.user_id
 GROUP BY user_id, user_name;
+
 ------------------------------------------------------------------------------------------
 
 --Q125 按月统计订单数与顾客数
@@ -1714,6 +1761,7 @@ FROM (
 	) a
 ) b
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q130 没有卖出的卖家
@@ -1743,6 +1791,7 @@ FROM num
 	LEFT JOIN customers c ON c.customer_id = num.n
 WHERE c.customer_id IS NULL
 ORDER BY ids;
+
 ------------------------------------------------------------------------------------------
 
 --Q132 三人国家代表队
@@ -1809,6 +1858,7 @@ FROM num
 	) d
 	ON d.yf = num.n
 ORDER BY month;
+
 ------------------------------------------------------------------------------------------
 
 --Q135 Hopper Company Queries II
@@ -1844,6 +1894,7 @@ FROM num
 		GROUP BY month(requested_at)
 	) d
 	ON d.yf = num.n;
+	
 ------------------------------------------------------------------------------------------
 
 --Q136 Hopper 公司查询III
@@ -1856,6 +1907,7 @@ select n 'month',avg_jl average_ride_distance,avg_sc average_ride_duration from(
 select n,round(avg(zjl)over(order by n range between current row and 2 following),2)avg_jl,round(avg(zsc)over(order by n range between current row and 2 following),2)avg_sc from(
 select n,ifnull(jl,0)zjl,ifnull(sc,0)zsc from num left join(
     select month(requested_at)yf,sum(ride_distance)jl,sum(ride_duration)sc from acceptedrides ac left join rides r on r.ride_id = ac.ride_id where year(requested_at) = 2020 group by month(requested_at))a on a.yf = num.n)b)c where n <= 10 order by n;
+    
 ------------------------------------------------------------------------------------------
 
 --Q137 每台机器的进程平均运行时间
@@ -1917,6 +1969,7 @@ FROM (
 	WHERE from_id > to_id
 ) a
 GROUP BY person1, person2;
+
 ------------------------------------------------------------------------------------------
 
 --Q143 访问日期之间最大的空档期
@@ -1930,6 +1983,7 @@ FROM (
 ) u
 GROUP BY user_id
 ORDER BY user_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q144 苹果和橘子的个数
@@ -1937,6 +1991,7 @@ SELECT SUM(b.apple_count + ifnull(c.apple_count, 0)) AS apple_count
 	, SUM(b.orange_count + ifnull(c.orange_count, 0)) AS orange_count
 FROM boxes b
 	LEFT JOIN chests c ON c.chest_id = b.chest_id;
+	
 ------------------------------------------------------------------------------------------
 
 --Q145 求关注者的数量
@@ -1972,6 +2027,7 @@ FROM loginfo l1
 		AND l1.ip_address != l2.ip_address
 		AND (l1.login <= l2.login
 			AND l1.logout >= l2.login);
+			
 ------------------------------------------------------------------------------------------
 
 --Q149 可回收且低脂的产品
@@ -1997,6 +2053,7 @@ FROM num
 	ON e.task_id = num.a
 		AND e.subtask_id = num.b
 WHERE e.task_id IS NULL;
+
 ------------------------------------------------------------------------------------------
 
 --Q151 每家商店的产品价格
@@ -2030,6 +2087,7 @@ FROM (
 ) a
 	LEFT JOIN players p ON p.player_id = a.id
 GROUP BY id;
+
 ------------------------------------------------------------------------------------------
 
 --Q153 员工的直属部门
@@ -2112,6 +2170,7 @@ FROM (
 ) j
 	LEFT JOIN users u ON j.uid = u.user_id
 GROUP BY j.uid, u.name, u.mail;
+
 ------------------------------------------------------------------------------------------
 
 --Q157 寻找今年具有正收入的客户
@@ -2130,6 +2189,7 @@ FROM (
 ) t
 WHERE px = 1
 ORDER BY transaction_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q159 联赛信息统计
@@ -2181,6 +2241,7 @@ FROM (
 	WHERE amt > max_income
 ) b
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q161 转换日期格式
@@ -2204,6 +2265,7 @@ FROM (
 	) a
 ) b
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q163 计算特殊奖金
@@ -2226,6 +2288,7 @@ FROM (
 ) e
 WHERE cnt > 1
 ORDER BY team_id, employee_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q165 2020年最后一次登录
@@ -2252,6 +2315,7 @@ FROM (
 WHERE l2.user_id IS NULL
 	AND l1.user_id IS NOT NULL
 GROUP BY u2, l1.page_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q167 按分类统计薪水
@@ -2273,6 +2337,7 @@ FROM (
 	) ac
 	ON ac.dj = b.cat
 GROUP BY cat;
+
 ------------------------------------------------------------------------------------------
 
 --Q168 Leetcodify好友推荐
@@ -2299,6 +2364,7 @@ FROM t t1
 WHERE a.u1 IS NULL
 GROUP BY t1.user_id, t2.user_id, t1.day
 HAVING COUNT(t1.song_id) >= 3;
+
 ------------------------------------------------------------------------------------------
 
 --Q169 兴趣相同的朋友
@@ -2318,6 +2384,7 @@ FROM t t1
 WHERE f.user1_id IS NOT NULL
 GROUP BY t1.user_id, t2.user_id, t1.day
 HAVING COUNT(t1.song_id) >= 3;
+
 ------------------------------------------------------------------------------------------
 
 --Q170 确认率
@@ -2329,6 +2396,7 @@ SELECT s.user_id
 FROM signups s
 	LEFT JOIN confirmations c ON c.user_id = s.user_id
 GROUP BY s.user_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q171 主动请求确认消息的用户
@@ -2364,6 +2432,7 @@ FROM friendship f1
 WHERE t2.u1 IS NOT NULL
 GROUP BY f1.user1_id, f1.user2_id
 HAVING COUNT(*) >= 3;
+
 ------------------------------------------------------------------------------------------
 
 --Q173 查询具有最多共同关注的所有两两结对组
@@ -2380,6 +2449,7 @@ FROM (
 	) a
 ) b
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q174 丢失信息的雇员
@@ -2428,6 +2498,7 @@ FROM (
 	WHERE px = 1
 ) b
 WHERE cs = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q176 上级经理已离职的公司员工
@@ -2446,6 +2517,7 @@ SELECT school_id, ifnull(MIN(score), -1) AS score
 FROM schools s
 	LEFT JOIN exam e ON e.student_count <= s.capacity
 GROUP BY school_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q178 统计实验的数量
@@ -2500,6 +2572,7 @@ FROM (
 		GROUP BY experience
 	) h
 	ON e.dj = h.experience;
+	
 ------------------------------------------------------------------------------------------
 
 --Q180 职员招聘人数II
@@ -2521,6 +2594,7 @@ FROM (
 	WHERE xs != 0
 ) b
 WHERE zj <= 70000;
+
 ------------------------------------------------------------------------------------------
 
 --Q181 无流量的账户数
@@ -2531,6 +2605,7 @@ FROM subscriptions sb
 		AND year(s.stream_date) = 2021
 WHERE year(end_date) >= 2021
 	AND stream_date IS NULL;
+	
 ------------------------------------------------------------------------------------------
 
 --Q182 低质量的问题
@@ -2548,6 +2623,7 @@ FROM candidates c
 GROUP BY c.candidate_id
 HAVING MIN(years_of_exp) >= 2
 AND SUM(score) > 15;
+
 ------------------------------------------------------------------------------------------
 
 --Q184 The Category of Each Member in the Store
@@ -2562,6 +2638,7 @@ FROM members m
 	LEFT JOIN visits v ON v.member_id = m.member_id
 	LEFT JOIN purchases p ON p.visit_id = v.visit_id
 GROUP BY m.member_id, name;
+
 ------------------------------------------------------------------------------------------
 
 --Q185 账户余额
@@ -2571,6 +2648,7 @@ SELECT account_id,
 ORDER BY  day) 'balance'
 FROM transactions
 ORDER BY  account_id,day;
+
 ------------------------------------------------------------------------------------------
 
 --Q186 赢得比赛的大学
@@ -2611,6 +2689,7 @@ FROM (
 	FROM orders
 ) o
 WHERE px != 2;
+
 ------------------------------------------------------------------------------------------
 
 --Q189 The Airport With the Most Traffic
@@ -2631,6 +2710,7 @@ FROM (
 	) b
 ) c
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q190 Build the Equation
@@ -2643,6 +2723,7 @@ SELECT concat(GROUP_CONCAT(concat(CASE
 		ELSE ''
 	END) ORDER BY power DESC SEPARATOR ''), '=0') AS equation
 FROM terms;
+
 ------------------------------------------------------------------------------------------
 
 --Q191 The Number of Passengers in Each Bus I
@@ -2664,6 +2745,7 @@ FROM buses d
 	) e
 	ON e.bid = d.bus_id
 ORDER BY bus_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q192 The Number of Passengers in Each Bus II
@@ -2693,6 +2775,7 @@ FROM buses d
 	ON e.id = d.bus_id
 		AND lx = 'b'
 ORDER BY bus_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q193 Order Two Columns Independently
@@ -2707,6 +2790,7 @@ FROM (
 	) d2
 	ON d1.sx = d2.jx
 ORDER BY d1.sx;
+
 ------------------------------------------------------------------------------------------
 
 --Q194 最多连胜的次数
@@ -2744,6 +2828,7 @@ FROM matches m
 		WHERE cx = 1
 	) c
 	ON c.player_id = m.player_id;
+	
 ------------------------------------------------------------------------------------------
 
 --Q195 The Change in Global Rankings
@@ -2754,6 +2839,7 @@ FROM (
 	FROM teampoints t
 		LEFT JOIN pointschange p ON p.team_id = t.team_id
 ) a;
+
 ------------------------------------------------------------------------------------------
 
 --Q196 Finding the Topic of Each Post
@@ -2764,6 +2850,7 @@ FROM (
 		LEFT JOIN keywords k ON instr(concat(' ', content, ' '), concat(' ', word, ' ')) > 0
 ) a
 GROUP BY post_id;
+
 ------------------------------------------------------------------------------------------
 
 --Q197 The Number of Users Tha Are Eligible for Discount
@@ -2794,6 +2881,7 @@ FROM (
 	FROM purchases
 ) p
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
 
 --Q199 The Users That Are Eligible for Discount
@@ -2821,6 +2909,7 @@ FROM (
 ) r1
 	LEFT JOIN rides r2 ON r1.did = r2.passenger_id
 GROUP BY did;
+
 ------------------------------------------------------------------------------------------
 
 --Q201 Dynamic Pivoting of a Table--涉及构建过程(较难)
@@ -2882,9 +2971,7 @@ FROM (
 	) a
 ) b
 WHERE px = 1;
+
 ------------------------------------------------------------------------------------------
-
-
-
 
 
